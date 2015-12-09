@@ -1,0 +1,4 @@
+tddium:
+  :ruby_version: '2.2.2'
+  :timeout_hook: 900
+  :timeout: 1200
