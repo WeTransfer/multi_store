@@ -6,10 +6,12 @@ rvm:
   - 2.0.0
   - 2.3.0
 matrix:
-  exclude:
+  include:
+  - rvm: 2.0.0
+    gemfile: gemfiles/Gemfile.rails-3.x
+  - rvm: 2.1.0
+    gemfile: gemfiles/Gemfile.rails-4.x
   - rvm: 2.3.0
-    gemfile: gemfiles/Gemfile.rails-4.1.x
-  - rvm: 2.1.1
-    gemfile: gemfiles/Gemfile.rails-5.0.x
+    gemfile: gemfiles/Gemfile.rails-5.x
 cache: bundler
 sudo: false
