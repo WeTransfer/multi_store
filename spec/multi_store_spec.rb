@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'redis-activesupport'
 
 module ActiveSupport
   module Cache
@@ -8,7 +9,7 @@ module ActiveSupport
       end
 
       let(:memory_store) { MemoryStore.new }
-      let(:file_store) { FileStore.new('tmp/cache') }
+      let(:file_store) { RedisStore.new }
       let(:stores) { [memory_store, file_store] }
       subject { MultiStore.new(*stores) }
 
@@ -21,7 +22,7 @@ module ActiveSupport
 
         context '#write' do
           it 'adds to all' do
-            expect(subject.write('unknown', 'some value')).to eq([true, true])
+            expect(subject.write('unknown', 'some value')).to eq([true, "OK"])
             expect(memory_store.read('unknown')).to eq('some value')
             expect(file_store.read('unknown')).to eq('some value')
           end
@@ -29,7 +30,7 @@ module ActiveSupport
 
         context '#delete' do
           it 'does nothing' do
-            expect(subject.delete('unknown')).to eq([false, true])
+            expect(subject.delete('unknown')).to eq([false, 1])
             expect(memory_store.read('unknown')).to be_nil
             expect(file_store.read('unknown')).to be_nil
           end
@@ -49,13 +50,13 @@ module ActiveSupport
         context '#write' do
           context 'and we are updating the key' do
             it 'adds to all' do
-              expect(subject.write('key', 'some other value')).to eq([true, true])
+              expect(subject.write('key', 'some other value')).to eq([true, "OK"])
               expect(memory_store.read('key')).to eq('some other value')
               expect(file_store.read('key')).to eq('some other value')
             end
           end
           it 'adds to all' do
-            expect(subject.write('key', 'value')).to eq([true, true])
+            expect(subject.write('key', 'value')).to eq([true, "OK"])
             expect(memory_store.read('key')).to eq('value')
             expect(file_store.read('key')).to eq('value')
           end
@@ -63,7 +64,7 @@ module ActiveSupport
 
         context '#delete' do
           it 'deletes from all' do
-            expect(subject.delete('key')).to eq([true, true])
+            expect(subject.delete('key')).to eq([true, 1])
             expect(memory_store.read('key')).to be_nil
             expect(file_store.read('key')).to be_nil
           end
@@ -82,13 +83,13 @@ module ActiveSupport
         context '#write' do
           context 'and we are updating the key' do
             it 'adds to all' do
-              expect(subject.write('key', 'some other value')).to eq([true, true])
+              expect(subject.write('key', 'some other value')).to eq([true, "OK"])
               expect(memory_store.read('key')).to eq('some other value')
               expect(file_store.read('key')).to eq('some other value')
             end
           end
           it 'adds to all' do
-            expect(subject.write('key', 'value')).to eq([true, true])
+            expect(subject.write('key', 'value')).to eq([true, "OK"])
             expect(memory_store.read('key')).to eq('value')
             expect(file_store.read('key')).to eq('value')
           end
@@ -96,7 +97,7 @@ module ActiveSupport
 
         context '#delete' do
           it 'deletes from all' do
-            expect(subject.delete('key')).to eq([false, true])
+            expect(subject.delete('key')).to eq([false, 1])
             expect(memory_store.read('key')).to be_nil
             expect(file_store.read('key')).to be_nil
           end
@@ -117,13 +118,13 @@ module ActiveSupport
           context '#write' do
             context 'and we are updating the key' do
               it 'adds to all' do
-                expect(subject.write('key', 'some other value')).to eq([true, true])
+                expect(subject.write('key', 'some other value')).to eq([true, "OK"])
                 expect(memory_store.read('key')).to eq('some other value')
                 expect(file_store.read('key')).to eq('some other value')
               end
             end
             it 'adds to all' do
-              expect(subject.write('key', 'value')).to eq([true, true])
+              expect(subject.write('key', 'value')).to eq([true, "OK"])
               expect(memory_store.read('key')).to eq('value')
               expect(file_store.read('key')).to eq('value')
             end
@@ -131,7 +132,7 @@ module ActiveSupport
 
           context '#delete' do
             it 'deletes from all' do
-              expect(subject.delete('key')).to eq([true, true])
+              expect(subject.delete('key')).to eq([true, 1])
               expect(memory_store.read('key')).to be_nil
               expect(file_store.read('key')).to be_nil
             end
@@ -150,13 +151,13 @@ module ActiveSupport
           context '#write' do
             context 'and we are updating the key' do
               it 'adds to all' do
-                expect(subject.write('key', 'some other value')).to eq([true, true])
+                expect(subject.write('key', 'some other value')).to eq([true, "OK"])
                 expect(memory_store.read('key')).to eq('some other value')
                 expect(file_store.read('key')).to eq('some other value')
               end
             end
             it 'adds to all' do
-              expect(subject.write('key', 'value')).to eq([true, true])
+              expect(subject.write('key', 'value')).to eq([true, "OK"])
               expect(memory_store.read('key')).to eq('value')
               expect(file_store.read('key')).to eq('value')
             end
@@ -164,7 +165,7 @@ module ActiveSupport
 
           context '#delete' do
             it 'deletes from all' do
-              expect(subject.delete('key')).to eq([true, true])
+              expect(subject.delete('key')).to eq([true, 1])
               expect(memory_store.read('key')).to be_nil
               expect(file_store.read('key')).to be_nil
             end
