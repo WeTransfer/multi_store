@@ -11,7 +11,7 @@ GEM
     i18n (0.9.1)
       concurrent-ruby (~> 1.0)
     json (1.8.6)
-    minitest (5.10.3)
+    minitest (5.11.1)
     rake (10.5.0)
     rdoc (3.12.2)
       json (~> 1.4)
@@ -19,6 +19,8 @@ GEM
     redis-activesupport (5.0.4)
       activesupport (>= 3, < 6)
       redis-store (>= 1.3, < 2)
+    redis-store (1.4.1)
+      redis (>= 2.2, < 5)
     rspec (2.99.0)
       rspec-core (~> 2.99.0)
       rspec-expectations (~> 2.99.0)
@@ -39,8 +41,8 @@ DEPENDENCIES
   bundler (~> 1.0)
   rake (~> 10.0)
   rdoc (~> 3.12)
-  rspec (~> 2.4)
   redis-activesupport
+  rspec (~> 2.4)
 
 BUNDLED WITH
-   1.15.3
+   1.15.1
