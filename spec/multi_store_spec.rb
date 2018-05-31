@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'redis-activesupport'
 
 module ActiveSupport
   module Cache
@@ -8,8 +9,8 @@ module ActiveSupport
       end
 
       let(:memory_store) { MemoryStore.new }
-      let(:file_store) { FileStore.new('tmp/cache') }
-      let(:stores) { [memory_store, file_store] }
+      let(:redis_store) { RedisStore.new }
+      let(:stores) { [memory_store, redis_store] }
       subject { MultiStore.new(*stores) }
 
       context 'when neither cache has the key' do
@@ -21,17 +22,17 @@ module ActiveSupport
 
         context '#write' do
           it 'adds to all' do
-            expect(subject.write('unknown', 'some value')).to eq([true, true])
+            expect(subject.write('unknown', 'some value')).to eq([true, "OK"])
             expect(memory_store.read('unknown')).to eq('some value')
-            expect(file_store.read('unknown')).to eq('some value')
+            expect(redis_store.read('unknown')).to eq('some value')
           end
         end
 
         context '#delete' do
           it 'does nothing' do
-            expect(subject.delete('unknown')).to eq([false, true])
+            expect(subject.delete('unknown')).to eq([false, 1])
             expect(memory_store.read('unknown')).to be_nil
-            expect(file_store.read('unknown')).to be_nil
+            expect(redis_store.read('unknown')).to be_nil
           end
         end
       end
@@ -42,35 +43,35 @@ module ActiveSupport
         context '#read' do
           it 'returns value' do
             expect(subject.read('key')).to eq('value')
-            expect(file_store.read('key')).to be_nil
+            expect(redis_store.read('key')).to be_nil
           end
         end
 
         context '#write' do
           context 'and we are updating the key' do
             it 'adds to all' do
-              expect(subject.write('key', 'some other value')).to eq([true, true])
+              expect(subject.write('key', 'some other value')).to eq([true, "OK"])
               expect(memory_store.read('key')).to eq('some other value')
-              expect(file_store.read('key')).to eq('some other value')
+              expect(redis_store.read('key')).to eq('some other value')
             end
           end
           it 'adds to all' do
-            expect(subject.write('key', 'value')).to eq([true, true])
+            expect(subject.write('key', 'value')).to eq([true, "OK"])
             expect(memory_store.read('key')).to eq('value')
-            expect(file_store.read('key')).to eq('value')
+            expect(redis_store.read('key')).to eq('value')
           end
         end
 
         context '#delete' do
           it 'deletes from all' do
-            expect(subject.delete('key')).to eq([true, true])
+            expect(subject.delete('key')).to eq([true, 1])
             expect(memory_store.read('key')).to be_nil
-            expect(file_store.read('key')).to be_nil
+            expect(redis_store.read('key')).to be_nil
           end
         end
       end
       context 'when the second cache has the key' do
-        before { file_store.write('key', 'value') }
+        before { redis_store.write('key', 'value') }
 
         context '#read' do
           it 'returns value and promotes' do
@@ -82,23 +83,23 @@ module ActiveSupport
         context '#write' do
           context 'and we are updating the key' do
             it 'adds to all' do
-              expect(subject.write('key', 'some other value')).to eq([true, true])
+              expect(subject.write('key', 'some other value')).to eq([true, "OK"])
               expect(memory_store.read('key')).to eq('some other value')
-              expect(file_store.read('key')).to eq('some other value')
+              expect(redis_store.read('key')).to eq('some other value')
             end
           end
           it 'adds to all' do
-            expect(subject.write('key', 'value')).to eq([true, true])
+            expect(subject.write('key', 'value')).to eq([true, "OK"])
             expect(memory_store.read('key')).to eq('value')
-            expect(file_store.read('key')).to eq('value')
+            expect(redis_store.read('key')).to eq('value')
           end
         end
 
         context '#delete' do
           it 'deletes from all' do
-            expect(subject.delete('key')).to eq([false, true])
+            expect(subject.delete('key')).to eq([false, 1])
             expect(memory_store.read('key')).to be_nil
-            expect(file_store.read('key')).to be_nil
+            expect(redis_store.read('key')).to be_nil
           end
         end
       end
@@ -106,7 +107,7 @@ module ActiveSupport
       context 'when both caches have the key' do
         before { memory_store.write('key', 'value') }
         context 'and they are the same value' do
-          before { file_store.write('key', 'value') }
+          before { redis_store.write('key', 'value') }
 
           context '#read' do
             it 'returns value' do
@@ -117,56 +118,56 @@ module ActiveSupport
           context '#write' do
             context 'and we are updating the key' do
               it 'adds to all' do
-                expect(subject.write('key', 'some other value')).to eq([true, true])
+                expect(subject.write('key', 'some other value')).to eq([true, "OK"])
                 expect(memory_store.read('key')).to eq('some other value')
-                expect(file_store.read('key')).to eq('some other value')
+                expect(redis_store.read('key')).to eq('some other value')
               end
             end
             it 'adds to all' do
-              expect(subject.write('key', 'value')).to eq([true, true])
+              expect(subject.write('key', 'value')).to eq([true, "OK"])
               expect(memory_store.read('key')).to eq('value')
-              expect(file_store.read('key')).to eq('value')
+              expect(redis_store.read('key')).to eq('value')
             end
           end
 
           context '#delete' do
             it 'deletes from all' do
-              expect(subject.delete('key')).to eq([true, true])
+              expect(subject.delete('key')).to eq([true, 1])
               expect(memory_store.read('key')).to be_nil
-              expect(file_store.read('key')).to be_nil
+              expect(redis_store.read('key')).to be_nil
             end
           end
         end
         context 'and they are different values' do
-          before { file_store.write('key', 'value2') }
+          before { redis_store.write('key', 'value2') }
 
           context '#read' do
             it 'returns value' do
               expect(subject.read('key')).to eq('value')
-              expect(file_store.read('key')).to eq('value2')
+              expect(redis_store.read('key')).to eq('value2')
             end
           end
 
           context '#write' do
             context 'and we are updating the key' do
               it 'adds to all' do
-                expect(subject.write('key', 'some other value')).to eq([true, true])
+                expect(subject.write('key', 'some other value')).to eq([true, "OK"])
                 expect(memory_store.read('key')).to eq('some other value')
-                expect(file_store.read('key')).to eq('some other value')
+                expect(redis_store.read('key')).to eq('some other value')
               end
             end
             it 'adds to all' do
-              expect(subject.write('key', 'value')).to eq([true, true])
+              expect(subject.write('key', 'value')).to eq([true, "OK"])
               expect(memory_store.read('key')).to eq('value')
-              expect(file_store.read('key')).to eq('value')
+              expect(redis_store.read('key')).to eq('value')
             end
           end
 
           context '#delete' do
             it 'deletes from all' do
-              expect(subject.delete('key')).to eq([true, true])
+              expect(subject.delete('key')).to eq([true, 1])
               expect(memory_store.read('key')).to be_nil
-              expect(file_store.read('key')).to be_nil
+              expect(redis_store.read('key')).to be_nil
             end
           end
         end
