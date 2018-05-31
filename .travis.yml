@@ -3,11 +3,14 @@ services:
 
 matrix:
   include:
-  - rvm: 2.2.2
+  - rvm: 2.2.10
     gemfile: gemfiles/Gemfile.rails-3.x
-  - rvm: 2.2.2
+  - rvm: 2.2.10
     gemfile: gemfiles/Gemfile.rails-4.x
-  - rvm: 2.3.0
+  - rvm:
+      - 2.3.7
+      - 2.4.4
+      - 2.5.1
     gemfile: gemfiles/Gemfile.rails-5.x
 cache: bundler
 sudo: false
