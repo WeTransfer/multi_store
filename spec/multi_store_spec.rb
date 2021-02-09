@@ -13,6 +13,14 @@ module ActiveSupport
       let(:stores) { [memory_store, redis_store] }
       subject { MultiStore.new(*stores) }
 
+      context 'when the input is a double level array' do
+        let(:stores) { [[ memory_store, redis_store ], {}] }
+
+        it 'still initializes the stores correctly' do
+          expect{ subject }.not_to raise_error
+        end
+      end
+
       context 'when neither cache has the key' do
         context '#read' do
           it 'returns nil' do

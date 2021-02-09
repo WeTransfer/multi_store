@@ -3,7 +3,8 @@ module ActiveSupport
     class MultiStore < Store
       def initialize(*stores)
         @monitor = Monitor.new
-        @stores = stores
+        @stores = stores.flatten.reject(&:blank?)
+
         super(stores.extract_options!)
       end
 
