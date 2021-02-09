@@ -33,5 +33,10 @@ Or install it yourself as:
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/Gusto/multi_store.
+Bug reports and pull requests are welcome on GitHub at https://github.com/WeTransfer/multi_store.
 
+To run tests locally:
+
+```bash
+$ bundle && bundle exec rake spec
+```
